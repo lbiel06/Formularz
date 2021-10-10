@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 from tinydb import TinyDB
 
 db = TinyDB('db.json')
@@ -7,7 +7,8 @@ app = Flask(__name__)
 
 # Formularz
 
-def formularz(form) -> bool:
+
+def formularz(form: dict) -> bool:
     if '' in form.values():
         return False
 
@@ -16,15 +17,22 @@ def formularz(form) -> bool:
 
 # Routing
 
+
 @app.route('/')
-def route_home():
+def _home():
     return render_template('formularz.html')
 
-@app.route('/formularz')
-def route_formularz():
-    if formularz(dict(request.args)):
-        return "OK"
-    return "Błąd"
+
+@app.route('/formularz', methods=['POST', 'GET'])
+def _formularz():
+    if request.method == 'GET':
+        return redirect(url_for('_home'))
+
+    if request.method == 'POST':
+        if formularz(dict(request.form)):
+            return "OK"
+        return "Błąd"
+
 
 if __name__ == '__main__':
     app.run()
